@@ -1,5 +1,5 @@
 # Efficient-coding-in-a-spiking-predictive-coding-network
-MATLAB code for a filter model, consisting of 'filter-and-fire' neurons with both recurrent and feed-forward filters, that performs close to optimal tracking of its input. 
+MATLAB code for a network filter model, consisting of 'filter-and-fire' neurons with both recurrent and feed-forward filters, that performs close to optimal tracking of its input. 
 
 When using this code, please reference the following Cosyne abstract: 
 
