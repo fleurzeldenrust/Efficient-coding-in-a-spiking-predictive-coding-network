@@ -3,7 +3,7 @@ MATLAB code for a network filter model, consisting of 'filter-and-fire' neurons 
 
 When using this code, please reference the following preprint: 
 
-Zeldenrust, F., Gutkin, B., & Denève, S. (2019). Efficient and robust coding in heterogeneous recurrent networks. BioRxiv. https://doi.org/dx.doi.org/10.1101/804864
+Zeldenrust, F., Gutkin, B., & Denève, S. (2019). Efficient and robust coding in heterogeneous recurrent networks. BioRxiv. https://doi.org/10.1101/804864
 
 
 # About
