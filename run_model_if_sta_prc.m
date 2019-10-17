@@ -3,7 +3,8 @@ clear all
 
 dbstop if error
 
-addpath('./functions/')
+f = filesep;
+addpath(['.' f 'functions'])
 
 factor = 1;
 Tf = 50*factor;           % time kernels
