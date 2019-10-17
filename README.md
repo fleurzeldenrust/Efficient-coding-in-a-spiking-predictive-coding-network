@@ -1,7 +1,7 @@
 # Efficient-coding-in-a-spiking-predictive-coding-network
 MATLAB code for a network filter model, consisting of 'filter-and-fire' neurons with both recurrent and feed-forward filters, that performs close to optimal tracking of its input. 
 
-When using this code, please reference the following preprint: 
+When using this code, please cite the following preprint: 
 
 Zeldenrust, F., Gutkin, B., & Denève, S. (2019). Efficient and robust coding in heterogeneous recurrent networks. BioRxiv. https://doi.org/10.1101/804864
 
