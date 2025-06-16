@@ -1,4 +1,4 @@
-function [tg, g, gin, gout, Th ] = generate_filters( tfilt, filt, plotvec, delta)
+function [tg, g, gin, gout, Th ] = generate_filters( tfilt, filt, plotvec, delta, options)
 % function that gives optimal input, lateral and output kernels and threshold, as a
 % function of :
 % * tfilt: filter time (vector), note that spike is at 0
@@ -20,6 +20,18 @@ function [tg, g, gin, gout, Th ] = generate_filters( tfilt, filt, plotvec, delta
 % delta<tfilt(end), the filter will be cut off
 
 %% Initialize
+
+if nargin == 4
+    options.normalizegin = 0;
+    options.plotfilters = 0;
+end
+if ~isfield(options, 'normalizegin')
+    options.normalizegin = 0;
+end
+if ~isfield(options, 'plotfilters')
+    options.plotfilters = 0;
+end
+
 dt = tfilt(2)-tfilt(1);
 tgmin = tfilt(1);
 tgmax = tfilt(end);
@@ -89,11 +101,11 @@ lga = length(find(tg<0)); % lenght acausal part
 
 cf = 0;
 if ((lgc+lga+1)==lg)
-    disp('filter with causal and acausal part')
+%     disp('filter with causal and acausal part')
 else
     if lga == 0
         if lgc == lg
-            disp('purely causal filters')
+%             disp('purely causal filters')
             cf=1;
             % add zeros from t=0    
             tg = (0:round(tgmax/dt))*dt;
@@ -105,13 +117,13 @@ else
             lg = lgtemp;
             clear gtemp lgtemp
         elseif lgc + 1 == lg
-            disp('causal filter including 0')
+%             disp('causal filter including 0')
         else
             error('length causal is not length filter')
         end
     elseif lgc == 0
         if lga+1 == lg
-            disp('acausal filters including 0')
+%             disp('acausal filters including 0')
         else
             error('length acausal part is not length filter')
         end
@@ -129,7 +141,7 @@ lgc = length(find(tg>0)); % length causal part
 lga = length(find(tg<0)); % lenght acausal part
 
 if ((lgc+lga+1)==lg)
-    disp('filter with causal and acausal part')
+%     disp('filter with causal and acausal part')
 else
     error('filter does not include 0, something went wrong')
 end
@@ -160,6 +172,15 @@ if ~(lgin==lg)
     clear gtemp
 end
 
+
+if options.normalizegin == 1
+    for ii = 1:Nker
+        norm = sqrt(0.5*dt*sum(gin(ii,:).^2));
+        g(ii,:)=(g(ii,:)./norm);
+        gin(ii,:)=(gin(ii,:)./norm);
+    end
+end
+
 %% Make output filters and threshold
 Th = zeros(1,Nker);
 gout = zeros(Nker, Nker, lg);
@@ -172,6 +193,7 @@ for ii = 1:Nker
         % NB gout(ii,jj): filter sent by jj, received by ii 
         if ii==jj
             if abs(2*Th(ii)-dt*temp(lg+lga+1+round(delta/dt)))>2*Th(ii)/10000;
+                keyboard
                 error('starting value output filter is not threshold; something went wrong')
             end
         end
@@ -179,56 +201,56 @@ for ii = 1:Nker
     end
 end
 
-
 %% Plot
-if length(plotvec)>0 
-    if min(plotvec)>0
-        figure
-        for plotnr = plotvec
-            subplot(2,2,1)
-            hold all
-            plot(tg, g(plotnr, :))  
-            subplot(2,2,2)
-            hold all
-            plot(tgin, gin(plotnr, :))  
-            subplot(2,2,3)
-            hold all
-            plot((1:lg)*dt, -squeeze(gout(plotnr, plotnr, :))/dt)
-            subplot(2,2,4)
-            hold all
-            for plotnr2 = plotvec
-                if plotnr == plotnr2
-                else
-                    plot((1:lg)*dt, -squeeze(gout(plotnr, plotnr2, :))/dt)
+if options.plotfilters == 1
+    if length(plotvec)>0 
+        if min(plotvec)>0
+            figure
+            for plotnr = plotvec
+                subplot(2,2,1)
+                hold all
+                plot(tg, g(plotnr, :))  
+                subplot(2,2,2)
+                hold all
+                plot(tgin, gin(plotnr, :))  
+                subplot(2,2,3)
+                hold all
+                plot((1:lg)*dt, -squeeze(gout(plotnr, plotnr, :)))
+                subplot(2,2,4)
+                hold all
+                for plotnr2 = plotvec
+                    if plotnr == plotnr2
+                    else
+                        plot((1:lg)*dt, -squeeze(gout(plotnr, plotnr2, :)))
+                    end
                 end
             end
+            subplot(2,2,1)
+            hold all
+            plot([0 0],[-1 1])
+            plot([delta delta],[min(min(g))-1 max(max(g))+1], 'k', 'LineWidth',2)
+            xlim([tgmin tgmax])
+            title('Representing filters g(t)')
+            xlabel('time (ms)')
+            grid on
+            subplot(2,2,2)
+            hold all
+            plot([delta delta],[min(min(gin))-1 max(max(gin))+1], 'k', 'LineWidth',2)
+            plot([0 0],[-1 1])
+            xlim([min(tgin) max(tgin)])
+            title('Input filters g^{in}(t)')
+            xlabel('time (ms)')
+            grid on
+            subplot(2,2,3)
+            xlim([min(tgin) max(tgin)+dt])
+            xlabel('t-T+\Delta (ms)')
+            title('Output filter g^{out}(t)')
+            grid on
+            subplot(2,2,4)
+            xlim([min(tgin) max(tgin)+dt])
+            title('Lateral filter g^{lat}(t)')
+            xlabel('t-T+\Delta (ms)')
+            grid on
         end
-        subplot(2,2,1)
-        hold all
-        plot([0 0],[-1 1])
-        plot([delta delta],[min(min(g))-1 max(max(g))+1], 'k', 'LineWidth',2)
-        xlim([tgmin tgmax])
-        title('Representing filters g(t)')
-        xlabel('time (ms)')
-        grid on
-        subplot(2,2,2)
-        hold all
-        plot([delta delta],[min(min(gin))-1 max(max(gin))+1], 'k', 'LineWidth',2)
-        plot([0 0],[-1 1])
-        xlim([min(tgin) max(tgin)])
-        title('Input filters g^{in}(t)')
-        xlabel('time (ms)')
-        grid on
-        subplot(2,2,3)
-        xlim([min(tgin) max(tgin)+dt])
-        xlabel('t-T+\Delta (ms)')
-        title('Output filter g^{out}(t)')
-        grid on
-        subplot(2,2,4)
-        xlim([min(tgin) max(tgin)+dt])
-        title('Lateral filter g^{lat}(t)')
-        xlabel('t-T+\Delta (ms)')
-        grid on
     end
 end
-
